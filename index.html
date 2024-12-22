@@ -30,7 +30,7 @@
 </head>
 <body>
   <div class="container mt-4">
-    <h1 class="text-center">Interactive Chat</h1>
+    <h1 class="text-center">Supabase Interactive Chat</h1>
 
     <!-- Auth Section -->
     <div id="auth-section">
@@ -45,6 +45,7 @@
               <div class="mb-3">
                 <input type="password" id="password-login" class="form-control" placeholder="Password" required />
               </div>
+              <div id="login-error" class="text-danger mb-2" style="display: none;"></div>
               <button type="submit" class="btn btn-primary w-100">Login</button>
             </form>
           </div>
@@ -61,6 +62,8 @@
               <div class="mb-3">
                 <input type="password" id="password-register" class="form-control" placeholder="Password" required />
               </div>
+              <div id="register-error" class="text-danger mb-2" style="display: none;"></div>
+              <div id="register-success" class="text-success mb-2" style="display: none;">Registration successful! Please log in.</div>
               <button type="submit" class="btn btn-success w-100">Register</button>
             </form>
           </div>
@@ -91,8 +94,8 @@
   </div>
 
   <script>
+    
     const supabase = supabase.createClient('https://etymntxnrnxooclgmiwv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0eW1udHhucm54b29jbGdtaXd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ4Njg1MzIsImV4cCI6MjA1MDQ0NDUzMn0.xSi6adgxBZjza2oQ1Y0bm_DxcUbt7iqIY-CFelqPgbU');
-
     const authSection = document.getElementById('auth-section');
     const chatSection = document.getElementById('chat-section');
     const onlineUsersDiv = document.getElementById('online-users');
@@ -102,20 +105,36 @@
       const username = document.getElementById('username-register').value;
       const email = document.getElementById('email-register').value;
       const password = document.getElementById('password-register').value;
+      const errorDiv = document.getElementById('register-error');
+      const successDiv = document.getElementById('register-success');
+
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
 
       const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) return alert(error.message);
+      if (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+        return;
+      }
 
       await supabase.from('users').insert([{ email, username }]);
-      alert('Registration successful! Please log in.');
+      successDiv.style.display = 'block';
     }
 
     async function loginUser() {
       const email = document.getElementById('email-login').value;
       const password = document.getElementById('password-login').value;
+      const errorDiv = document.getElementById('login-error');
+
+      errorDiv.style.display = 'none';
 
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return alert(error.message);
+      if (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+        return;
+      }
 
       await setOnlineStatus(true);
       toggleAuthUI(true);
@@ -207,3 +226,7 @@
   </script>
 </body>
 </html>
+
+    
+
+    
